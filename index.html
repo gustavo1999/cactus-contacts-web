@@ -1,0 +1,316 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <title>Cactus Contacts</title>
+
+  <meta name="description" content="Cactus Contacts">
+
+  <style>
+
+  </style>
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script src="//cdn.jsdelivr.net/pouchdb/5.1.0/pouchdb.min.js"></script>
+  <script src="base.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap theme -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="http://getbootstrap.com/examples/theme/theme.css" rel="stylesheet">
+
+</head>
+
+
+<body role="document" onload="listAllContacts()">
+
+ <div class="container theme-showcase" role="main">
+
+    <div id="contact-list-pane" class="page-header">
+
+      <h4>
+     Contacts List
+     <button class="btn btn-xs btn-default" onclick="showAddContactPane()">+</button>
+     </h4>
+      <div id="contact_list">
+        <ul id="contact_list_ul" class="list-group">
+      </div>
+      <button id="debug-mode-button" class="btn btn-xs btn-info" onclick="toggleDebugMode()">toggle debug mode</button>
+      
+      <div id="debug-buttons-pane">
+        <button class="btn btn-xs btn-default" onclick="addDummyContact()">Add Test Data</button>
+        <button class="btn btn-xs btn-default" onclick="listAllContacts()">List All Contacts</button>
+        <button class="btn btn-xs btn-default" onclick="removeAllContacts()">Remove All Contacts</button>
+      </div>
+    </div>
+    <!-- contact-list-pane -->
+
+
+    <div id="add-contact-pane">
+      <h4>
+      <button class="btn btn-xs btn-default" onclick="hideAddContactPane()">Cancel</button>
+      New Contact
+      <button class="btn btn-xs btn-default" onclick="addContact()">Done</button>
+      </h4>
+      
+       <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <label for="first-name">First Name:</label>
+          <input type="text" id="first-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="last-name">Last Name:</label>
+          <input type="text" id="last-name" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="text" id="email" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="mobile">Mobile:</label>
+          <input type="text" id="mobile" class="form-control">
+        </div>
+       </form>
+      
+       
+    </div>
+    <!-- add-contact-pane -->
+
+  </div>
+  <!-- container -->
+
+</body>
+
+<script>
+  //ui elements
+  var addContactPane = window.document.getElementById('add-contact-pane'); addContactPane.hidden = true;
+  var debugButtonsPane = window.document.getElementById('debug-buttons-pane'); debugButtonsPane.hidden = true;
+  var debugModeButton = window.document.getElementById('debug-mode-button');
+  var contactListPane = window.document.getElementById('contact-list-pane');
+  var firstName = document.getElementById('first-name');
+  var lastName = document.getElementById('last-name');
+  var email = document.getElementById('email');
+  var mobile =  document.getElementById('mobile');
+  
+  //initialize database
+  var db = new PouchDB('contacts');
+  var remoteCouch = false;
+
+  //  db.changes({
+  //    since: 'now',
+  //    live: true
+  //  }).on('change', listAllContacts); 
+  
+ function addContact(){
+      var newContact = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: email.value,
+        mobile: mobile.value
+      }
+      addContactToDb(newContact);
+      hideAddContactPane();
+      listAllContacts();
+  }  
+  
+   //add new contact to database
+    function addContactToDb(newContact) {
+        db.post(newContact).then(function (response) {
+          // handle response
+          console.log('Successfully added a contact to the database');
+        }).catch(function (err) {
+          console.log('Failed to add a contact to the database:' + err);
+        });
+    }
+    
+    function showAddContactPane(){
+      //show add contact pane
+      addContactPane.hidden = false;      
+      //hide contact list
+      contactListPane.hidden = true;
+    }
+    
+    function hideAddContactPane(){
+      //clear form fields
+      
+      
+      //hide contact editor
+      addContactPane.hidden = true;      
+      //show contact list
+      contactListPane.hidden = false;
+    }
+    
+   function toggleDebugMode(){
+     var a = debugButtonsPane.hidden ? debugButtonsPane.hidden=false : debugButtonsPane.hidden = true;
+   }
+
+   function addContacts(newContacts){
+      addContactsToDb(newContacts);
+      hideAddContactPane();
+      listAllContacts();
+   }  
+    
+   //add multiple contacts to the database in a single bulk operation
+   function addContactsToDb(docs) {   
+      db.bulkDocs(docs).then(function (result) {
+        console.log('Successfully added a set of docs to the database');
+      }).catch(function (err) {
+        console.log('Failed to add a set of contact to the database:' + err);
+      });
+   }
+   
+   //update existing contact in database
+   function updateContact(){
+    var newContact = {
+      firstName: document.getElementById('first-name').value,
+      lastName: document.getElementById('last-name').value,
+      email: document.getElementById('email').value,
+      mobile: document.getElementById('mobile').value
+    }
+    updateContactInDb(newContact);
+    listAllContacts();
+   }  
+   
+   
+   function updateObjectInDb(newObject) {
+    db.get(newObject._id).then(function(doc) {
+      db.put(newObject, newObject._id, newObject._rev);
+    }).then(function(response) {
+      // handle response
+      console.log('Successfully updated object in the database');
+    }).catch(function (err) {
+      console.log('Failed to update object in the database:' + err);
+     });
+  }
+   
+   //delete contact from database
+  function removeContact(docId) {
+    removeObjectFromDb(docId);
+    listAllContacts();
+  }
+  
+  //delete all contacts from database
+  function removeAllContacts() {
+    //TODO: refactor is there a bulk delete function in pouchDB?
+    var options = {include_docs: false, descending: true};
+    db.allDocs(options, function(err, response) {
+      var row = response.rows.map(function (row) {
+          removeObjectFromDb(row.key);
+        }
+      ); 
+    listAllContacts();   
+    });
+    
+  }
+
+  
+  function removeObjectFromDb(docId) {
+    db.get(docId).then(function(doc) {
+      db.remove(doc._id, doc._rev);
+    }).then(function (result) {
+      // handle result
+      console.log('Successfully deleted object from the database. ObjectId: ' + docId);
+    }).catch(function (err) {
+      console.log('Failed to delete object from the database:' + err);
+    });
+  }
+   
+   
+   //clear UI contents pane
+   function clearContactsFromUI() {
+     var ul = document.getElementById('contact_list_ul');
+     //alert('UL has this many childnodes:'+ ul.childNodes.length);
+    while (ul.hasChildNodes()) {
+        ul.removeChild(ul.firstChild);
+    }
+   }
+   
+   //add a single contact to UI contents pane
+   function writeContactToUI(row) {
+    var ul = document.getElementById('contact_list_ul');
+    var li = document.createElement('li');
+    li.className = "list-group-item";
+    var doc = db.get(row.key).then(function (doc) {
+        //DODO filter out deleted documents
+        //see http://pouchdb.com/2015/02/28/efficiently-managing-ui-state-in-pouchdb.html
+          li.innerHTML = doc.lastName + ', ' + doc.firstName + ', ' + doc.mobile + ', ' + doc.email + ' <button class="btn btn-xs btn-danger" onclick="removeContact(\'' + doc._id + '\')">delete</button>';
+          ul.appendChild(li);
+    }).catch(function (err) {
+      console.log('Failed to write contact to UI:' + err);
+     
+    });
+   }
+   
+   //retrieve all contacts from database and display them in UI contents pane
+   function listAllContacts(){
+    //console.log('function listAllContacts() called');
+    clearContactsFromUI();
+    //fetch a batch of documents
+    db.allDocs({
+      include_docs: true
+    }).then(function (response) {
+      //alert(response.rows.length);
+      var row = response.rows.map(function (row) {
+        //alert(JSON.stringify(row));
+        writeContactToUI(row);
+      }
+      );
+    }).catch(function (err) {
+      console.log('Failed to write all contacts to UI:' + err);
+    });
+   }
+   
+   //unit test
+   function addDummyContact(){
+      var newContacts = [];
+ 
+      newContacts.push({
+        firstName: "Amy",
+        lastName: "Ames",
+        email: "a@gmail.com",
+        mobile: "202-222-2222"
+      });
+    
+      newContacts.push({
+        firstName: "Bob",
+        lastName: "Brown",
+        email: "b@gmail.com",
+        mobile: "202-111-11111"
+      });
+ 
+      newContacts.push({
+        firstName: "Sue",
+        lastName: "Stevens",
+        email: "s@gmail.com",
+        mobile: "703-333-3333"
+      });
+  
+      addContacts(newContacts);
+    
+   }
+
+</script>
+
+<!-- Bootstrap Javascript -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+  window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')
+
+</script>
+<script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+<script src="http://getbootstrap.com/assets/js/docs.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+
+</html>
