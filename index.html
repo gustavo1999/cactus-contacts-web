@@ -1,10 +1,13 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-
-  <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
 
   <title>Cactus Contacts</title>
 
@@ -23,36 +26,79 @@
   <!-- Bootstrap core CSS -->
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap theme -->
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet">
+  <link href="bootstrap-theme.min.css" rel="stylesheet">
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <link href="http://getbootstrap.com/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
   <!-- Custom styles for this template -->
   <link href="http://getbootstrap.com/examples/theme/theme.css" rel="stylesheet">
 
+  <!-- Custom styles for this app -->
+  <link href="cactuscontacts.css" rel="stylesheet">
+
 </head>
 
 
-<body role="document" onload="listAllContacts()"> 
+<body role="document" onload="toggleDebugMode();listAllContacts()" style="padding-top:0px;"> 
 
- <div class="container theme-showcase" role="main">
+<!-- new header -->
 
-    <div id="contact-list-pane" class="page-header">
-
-      <h4>
-     Contacts List
-     <button class="btn btn-xs btn-default" onclick="showAddContactPane()">+</button>
-     </h4>
-      <div id="contact_list">
-        <ul id="contact_list_ul" class="list-group">
+    <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a class="navbar-brand" href="#">Fixed navbar</a>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">Disabled</a>
+          </li>
+        </ul>
+        <form class="form-inline mt-2 mt-md-0">
+          <input class="form-control mr-sm-2" type="text" placeholder="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
       </div>
-      <button id="debug-mode-button" class="btn btn-xs btn-info" onclick="toggleDebugMode()">toggle debug mode</button>
-      
-      <div id="debug-buttons-pane">
+    </nav>
+
+<!-- end new header --> 
+
+
+ <div class="container-fluid" style="">
+
+    <div class="card">
+
+      <h3 class="card=header">
+        Contacts
+      </h3>
+      <div class="card-block">
+        <button class="btn btn-md btn-default" id="add-contact-button" onclick="showAddContactPane()">+Add Contact</button> 
+        <button class="btn btn-md btn-default" id="debug-mode-button" onclick="toggleDebugMode()">Debug Mode</button>
+      </div>
+  
+      <div class="card-block" id="debug-buttons-pane">
         <button class="btn btn-xs btn-default" onclick="addDummyContact()">Add Test Data</button>
         <button class="btn btn-xs btn-default" onclick="listAllContacts()">List All Contacts</button>
         <button class="btn btn-xs btn-default" onclick="removeAllContacts()">Remove All Contacts</button>
       </div>
+   
+<!--end header -->
+
+      <div class="list-group list-group-flush" id="contact-list-pane">
+        <ul id="contact_list_ul" class="list-group">
+      </div>
+
+      <div class="card-block">
+        <a href="#" class="card-link">Link A</a>
+        <a href="#" class="card-link">Link B</a>
+      </div>
+
     </div>
     <!-- contact-list-pane -->
 
@@ -64,7 +110,7 @@
       <button class="btn btn-xs btn-default" onclick="addContact()">Done</button>
       </h4>
       
-       <form class="navbar-form navbar-left" role="search">
+       <form>
         <div class="form-group">
           <label for="first-name">First Name:</label>
           <input type="text" id="first-name" class="form-control" required>
@@ -90,12 +136,22 @@
   </div>
   <!-- container -->
 
+  <!-- new footer -->
+
+    <footer class="footer">
+      <div class="container">
+        <span class="text-muted">Place sticky footer content here.</span>
+      </div>
+    </footer>
+
+  <!-- end new footer -->
+
 </body>
 
 <script>
   //ui elements
   var addContactPane = window.document.getElementById('add-contact-pane'); addContactPane.hidden = true;
-  var debugButtonsPane = window.document.getElementById('debug-buttons-pane'); debugButtonsPane.hidden = true;
+  var debugButtonsPane = window.document.getElementById('debug-buttons-pane'); debugButtonsPane.hidden = false;
   var debugModeButton = window.document.getElementById('debug-mode-button');
   var contactListPane = window.document.getElementById('contact-list-pane');
   var firstName = document.getElementById('first-name');
@@ -254,7 +310,7 @@
    
    //retrieve all contacts from database and display them in UI contents pane
    function listAllContacts(){
-    //console.log('function listAllContacts() called');
+    console.log('function listAllContacts() called');
     clearContactsFromUI();
     //fetch a batch of documents
     db.allDocs({
