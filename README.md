@@ -1,5 +1,5 @@
-# cactuscontactswebpouch
+# Cactus Contacts
+Is a command line application for storing and managing a list of contacts written in Javascript and HTML. It stores data in PouchDB.js
 
-Goal: Create a simple contacts storage application that allows you to create, edit, and store contact information for anyone.
-
-Design Goal: Utilize PouchDB and Bootstrap.js
+# License
+GNU GPL
